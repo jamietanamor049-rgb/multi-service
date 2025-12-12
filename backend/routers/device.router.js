@@ -1,11 +1,10 @@
-import { Stack } from "expo-router";
-import './global.css';
-import { StatusBar } from "expo-status-bar";
+import express from 'express';
 
-export default function RootLayout() {
-  return (
-    <>
-      <StatusBar hidden={true} />
-      <Stack screenOptions={{ headerShown: false }} />
-    </>);
-}
+import { registerNewDevice, getDevices, deviceOnline} from '../controllers/device.controller.js';
+
+const router= express.Router();
+
+router.post("/register", registerNewDevice);
+router.get("/get",getDevices);
+router.post("/online", deviceOnline);
+export default router;
