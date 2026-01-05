@@ -8,11 +8,11 @@
 #define SS_PIN 10
 #define RST_PIN 9
 
-// --- Define Components ---
-#define DHTPIN 2          // DHT22 data pin connected to digital pin 2
+
+#define DHTPIN 2          
 #define DHTTYPE DHT22
-#define RAIN_SENSOR 8     // Rain sensor digital output pin
-#define BUZZER 7    // Buzzer pin
+#define RAIN_SENSOR 8     
+#define BUZZER 7    
 
 #define IR_1 3 
 #define IR_2 4
@@ -20,9 +20,8 @@
 
 #define CURRENT_THRESHOLD_MA 1.5
 
-// --- Initialize Objects ---
 DHT dht(DHTPIN, DHTTYPE);
-LiquidCrystal_I2C lcd(0x27, 16, 2);  // Change 0x27 to 0x3F if needed
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 Adafruit_INA219 ina219;
 
@@ -40,15 +39,15 @@ bool isPort1Charging;
 void checkCharger(){
   float current_mA = ina219.getCurrent_mA();
 
-  Serial.print("Current: ");
-  Serial.print(current_mA);
-  Serial.print(" mA -> ");
+  //Serial.print("Current: ");
+  //Serial.print(current_mA);
+  //Serial.print(" mA -> ");
 
   if (current_mA >= CURRENT_THRESHOLD_MA) {
-    Serial.println("**DEVICE PLUGGED AND DRAWING POWER**");
+    Serial.print("1");
     isPort1Charging = true;
   } else {
-    Serial.println("No device/Device is in standby/minimal current draw.");
+    Serial.print("0");
     isPort1Charging =false;
   }
 }
@@ -64,8 +63,8 @@ void setup() {
   lcd.init();
   lcd.backlight();
   dht.begin();
-  SPI.begin();         // Init SPI bus
-  mfrc522.PCD_Init();  // Init RFID module
+  SPI.begin();         
+  mfrc522.PCD_Init();
   
   if (! ina219.begin()) {
     Serial.println("Failed to find INA219 chip. Check wiring.");
@@ -97,10 +96,14 @@ void loop() {
     lcd.print("C H:");
     lcd.print(humidity, 0);
     lcd.print("%     ");
+    Serial.print(temperature);
+    Serial.print(",");
+    Serial.print(humidity);
+    Serial.print(",");
   }
 
   if (rainState == LOW) { // LOW = wet / raining
-    Serial.println("Raining");
+    Serial.print("1,");
     for(int i=0;i<3;i++){
       tone(BUZZER, 1000);
       delay(400);
@@ -108,7 +111,7 @@ void loop() {
       delay(200);
     }
   } else {
-    Serial.println("Sunny");
+    Serial.print("0,");
   }
 
   delay(100);
@@ -120,21 +123,21 @@ void loop() {
   delay(60);
 
   if(ir1 == LOW){
-    Serial.println("Umbrella 1 occupied!");
+    Serial.print("1,");
   }else{
-    Serial.println("Umbrella 1 unoccupied!");
+    Serial.print("0,");
   }
 
   if(ir2 == LOW){
-    Serial.println("Umbrella 2 occupied!");
+    Serial.print("1,");
   }else{
-    Serial.println("Umbrella 2 unoccupied!");
+    Serial.print("0,");
   }
 
   if(ir3 == LOW){
-    Serial.println("Umbrella 3 occupied!");
+    Serial.print("1,");
   }else{
-    Serial.println("Umbrella 3 unoccupied!");
+    Serial.print("0,");
   }
 
 
@@ -181,10 +184,12 @@ void loop() {
     currentDisplayedValue++;
     previousUpdate = millis();
 
-    if(currentDisplayedValue > 3){
+    if(currentDisplayedValue > 4){
       currentDisplayedValue = 0;
     }
   }
+  checkCharger();
+  Serial.println();
 //-----------------------RFID part ----------------------------------------
   if (!mfrc522.PICC_IsNewCardPresent()) return;
   if (!mfrc522.PICC_ReadCardSerial()) return;
@@ -213,5 +218,5 @@ void loop() {
   lcd.setCursor(0, 0);
   lcd.print("                ");
   uid = "";
-  delay(2000);
+  delay(3000);
 }

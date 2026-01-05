@@ -1,31 +1,27 @@
 import mongoose from 'mongoose';
 
-const DeviceSchema = new mongoose.Schema({
-  // 🔖 Device Info
-  deviceID: {
-    type: String,
-    required: true
-  },
+const types = ['Irrigation Activation', 'Data Submission', 'Seedling Sow', 'Seedling Ready'];
+const reservoirLevels = ['OK', 'LOW', 'FULL'];
+const waterLevels = ['OK', 'LOW', 'FULL']
 
-  owner: {
-    type: mongoose.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-
-  isOnline: {
-    type: Boolean,
-    default: false
-  },
-
-  lastUpdate: {
-    type: Number,
-    required: true,
-    default: 0
-  },
-
-  // 🌦 WEATHER MONITORING SYSTEM
-  temperature: {
+const EventSchema = new mongoose.Schema({
+    device:{
+        type: mongoose.Types.ObjectId,
+        ref: 'Device',
+        required: true
+    },
+    eventDate:{
+        type: Number,
+        required: true,
+        default: Date.now()
+    },
+    eventType:{
+        type: String,
+        enum: types,
+        required: true,
+        default: 'Data Submission'
+    },
+     temperature: {
     type: Number,
     required: true,
     default: 0
@@ -110,5 +106,6 @@ const DeviceSchema = new mongoose.Schema({
   }
 });
 
-const Device = mongoose.model('Device', DeviceSchema);
-export default Device;
+const Event=mongoose.model('Event', EventSchema);
+
+export default Event;
